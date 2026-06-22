@@ -44,6 +44,28 @@ The reproduction matches and slightly exceeds the reported F1. One difference wo
 this run is **precision-heavy / recall-light** relative to the paper's balanced precision/recall —
 i.e. it is slightly more conservative about flagging change. Net F1 still comes out ahead.
 
+## Extension (in progress): cross-dataset transfer LEVIR → WHU-CD
+
+To probe generalization, the LEVIR-trained model (best checkpoint, epoch 194) is evaluated
+**zero-shot** (no retraining) on the WHU-CD test set. WHU-CD is a different building change-detection
+dataset (Christchurch, NZ, aerial), preprocessed to 256×256 tiles.
+
+| Metric (change class) | LEVIR (in-domain) | WHU (zero-shot) | Drop |
+|---|---|---|---|
+| F1 | 0.9027 | 0.7042 | −19.9 |
+| IoU | 0.8226 | 0.5434 | −27.9 |
+| Precision | 0.9247 | 0.6921 | −23.3 |
+| Recall | 0.8817 | 0.7167 | −16.5 |
+
+The same model drops ~20 F1 points moving to a new dataset with no retraining — a clear
+cross-dataset generalization gap. Notably, **precision collapses more than recall** (−23.3 vs −16.5):
+out-of-domain the model *over-flags* change (more false positives), the opposite of its
+precision-heavy behaviour in-domain.
+
+> Eval command: copy `best_ckpt.pt` into `checkpoints/whu_eval/`, then
+> `python eval_cd.py --project_name whu_eval --data_name WHU --net_G base_transformer_pos_s4_dd8 --split test --gpu_ids 0`
+> (passing `--net_G` is required; the default is a different architecture).
+
 ## How to reproduce
 
 1. Clone this fork and set up the environment (PyTorch 2.x, torchvision, numpy).
