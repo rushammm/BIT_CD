@@ -73,6 +73,6 @@ precision-heavy behaviour in-domain.
 3. Train with the BIT config (`base_transformer_pos_s4_dd8`, settings above) — see `main_cd.py` / `scripts/`.
 4. Evaluate the best checkpoint with `eval_cd.py`.
 
-> **Trained weights** are not committed here (large binary). [link your Drive checkpoint here]
+> **Trained weights** are not committed here (large binary). Available on request.
 
 See the original [`README.md`](README.md) for full usage details from the authors.
