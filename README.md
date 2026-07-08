@@ -1,5 +1,27 @@
 # Remote Sensing Image Change Detection with Transformers
 
+## Fork Note
+
+This repository is a fork of the official BIT-CD implementation for
+**"Remote Sensing Image Change Detection with Transformers"** by Chen, Qi, and Shi.
+
+Original code and method credit belongs to the authors.
+
+My additions in this fork focus on:
+
+- reproducing BIT-CD on LEVIR-CD,
+- documenting compatibility fixes for modern PyTorch/numpy,
+- testing cross-dataset transfer from LEVIR-CD to WHU-CD,
+- comparing DOFA and DINOv2 foundation-model backbones inside the BIT-CD pipeline.
+
+For my reproduction and extension results, see:
+
+- [`REPRODUCTION.md`](REPRODUCTION.md)
+- [`BIT_CD_FOUNDATION_RESULTS.md`](BIT_CD_FOUNDATION_RESULTS.md)
+- [`foundation_backbone_comparison.ipynb`](foundation_backbone_comparison.ipynb)
+
+---
+
 Here, we provide the pytorch implementation of the paper: Remote Sensing Image Change Detection with Transformers.
 
 For more ore information, please see our published paper at [IEEE TGRS](https://ieeexplore.ieee.org/document/9491802) or [arxiv](https://arxiv.org/abs/2103.00208). 
