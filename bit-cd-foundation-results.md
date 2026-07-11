@@ -62,6 +62,8 @@ It is a quick robustness ratio under cross-dataset shift.
 | DINOv2 frozen | **0.7729** | **0.7805** | **101.0%** | P0.877 / R0.703 |
 | DINOv2 fine-tuned | 0.8031 | 0.3862 | 48.1% | P0.266 / R0.704 |
 
+![In-domain vs zero-shot F1 for each backbone](figures/transfer_f1_chart.png)
+
 ## Main takeaway
 
 The strongest cross-dataset result came from **frozen DINOv2**.
@@ -70,42 +72,35 @@ Fine-tuning improved DINOv2's in-domain LEVIR score, but badly hurt WHU transfer
 was precision collapse: the fine-tuned DINOv2 model started over-flagging change on the unseen WHU
 dataset.
 
-That suggests a practical lesson for satellite/property workflows:
+The failure is visible directly in the predicted masks. On this WHU test scene, a new warehouse roof
+appears between t1 and t2. Frozen DINOv2 tracks that change and stays quiet elsewhere; the fine-tuned
+model flags the new roof *and* an entire block of buildings that never changed.
 
-> For imagery that varies across year, geography, vendor, resolution, lighting, and season, frozen
+![Frozen vs fine-tuned DINOv2 predictions on a WHU test scene](figures/whu_frozen_vs_ft_square.png)
+
+The practical lesson:
+
+> For imagery that varies across year, geography, sensor, resolution, lighting, and season, frozen
 > foundation-model features may be more robust than aggressively fine-tuned features.
 
-## Why this matters for property comparison
-
-A year-over-year property comparison system needs to handle domain shift naturally:
-
-- different capture dates
-- different lighting/shadows
-- different visual conditions
-- possibly different imagery providers
-- different neighborhoods/geographies
-
-This experiment directly probes that kind of shift. A model trained on one building-change dataset
-was evaluated zero-shot on another geography, and the frozen foundation-model backbone generalized
-best.
-
-For a practical prototype, I would use the same high-level structure:
-
-1. Align two property images from different years.
-2. Segment relevant features such as buildings, paved areas, parking lots, and open land.
-3. Diff the masks across years.
-4. Return an interpretable change map: new structures, removed structures, expansions, and land-use
-   changes.
+Notably, EO-specific pretraining (DOFA) gave no advantage over general-purpose pretraining (DINOv2)
+here — on both datasets, frozen-vs-frozen, DINOv2 was ahead. The axis that mattered was
+frozen-vs-fine-tuned, not EO-vs-general.
 
 ## Caveats
 
-This is research-grade evidence, not a final production benchmark.
+This is research-grade evidence, not a benchmark.
 
-- Current result is one dataset pair: LEVIR-CD -> WHU-CD.
-- Current result is single-seed.
-- The adapter is intentionally simple and may cap absolute performance.
+- One dataset pair only: LEVIR-CD -> WHU-CD.
+- Single seed.
+- The adapter is intentionally simple (a 1x1 conv plus bilinear upsampling from the ViT patch grid to
+  BIT's 64x64 feature map), which caps absolute in-domain performance — hence ~0.77 F1 frozen against
+  the ResNet baseline's 0.90.
+- DINOv2's 16x16 patch grid is finer than DOFA's 14x14, a small resolution confound in the
+  general-vs-EO comparison.
 - The claim is about cross-dataset robustness, not in-domain state-of-the-art performance.
 
-Even with those caveats, the experiment is useful because it validates the core technical direction:
-segmentation/change masks are a better fit for this problem than asking a generic image-reasoning
-system to infer property changes directly.
+The frozen-beats-fine-tuned direction is consistent with prior work on fine-tuning distorting
+pretrained features under distribution shift (Kumar et al., ICLR 2022); the contribution here is a
+controlled demonstration in the change-detection setting, plus the finding that EO-specific
+pretraining buys nothing over general features.
