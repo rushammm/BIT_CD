@@ -16,8 +16,8 @@ My additions in this fork focus on:
 
 For my reproduction and extension results, see:
 
-- [`REPRODUCTION.md`](REPRODUCTION.md)
-- [`BIT_CD_FOUNDATION_RESULTS.md`](BIT_CD_FOUNDATION_RESULTS.md)
+- [`reproduction.md`](reproduction.md)
+- [`bit-cd-foundation-results.md`](bit-cd-foundation-results.md)
 - [`foundation_backbone_comparison.ipynb`](foundation_backbone_comparison.ipynb)
 
 ---
