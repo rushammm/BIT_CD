@@ -1,26 +1,30 @@
-# Remote Sensing Image Change Detection with Transformers
+# BIT-CD: reproduction + foundation-model backbone study
 
-## Fork Note
+> **Fork note.** This is a fork of [justchenhao/BIT_CD](https://github.com/justchenhao/BIT_CD), the official implementation of *"Remote Sensing Image Change Detection with Transformers"* (Chen, Qi & Shi, IEEE TGRS 2021). **All credit for the method and original code belongs to the authors.** Everything in this section is my own reproduction and extension; the authors' original README follows below.
 
-This repository is a fork of the official BIT-CD implementation for
-**"Remote Sensing Image Change Detection with Transformers"** by Chen, Qi, and Shi.
+I reproduced BIT-CD on LEVIR-CD, then asked whether a foundation-model backbone would help it generalize to a *different* change-detection dataset without retraining.
 
-Original code and method credit belongs to the authors.
+**Reproduction.** Trained BIT on LEVIR-CD and matched the published result (F1 0.9027 vs the paper's 0.8931), after three one-line compatibility fixes for PyTorch 2.x / modern numpy. Details in [`reproduction.md`](reproduction.md).
 
-My additions in this fork focus on:
+**The problem.** That same LEVIR-trained model, run zero-shot on WHU-CD, drops ~20 F1 points (0.903 → 0.704). Precision falls further than recall, so out-of-domain it *over-flags* change.
 
-- reproducing BIT-CD on LEVIR-CD,
-- documenting compatibility fixes for modern PyTorch/numpy,
-- testing cross-dataset transfer from LEVIR-CD to WHU-CD,
-- comparing DOFA and DINOv2 foundation-model backbones inside the BIT-CD pipeline.
+**The experiment.** I swapped BIT's ImageNet ResNet backbone for two foundation models, frozen and fine-tuned, with a small adapter reshaping ViT patch tokens into BIT's spatial feature map: **DOFA** (Earth-observation pretrained) and **DINOv2** (general-purpose vision).
 
-For my reproduction and extension results, see:
+| Backbone | LEVIR F1 | WHU F1 (zero-shot) | Keeps |
+|---|---:|---:|---:|
+| ResNet (BIT baseline) | 0.903 | 0.704 | 78% |
+| DOFA frozen | 0.721 | 0.693 | 96% |
+| DOFA fine-tuned | 0.724 | 0.518 | 72% |
+| **DINOv2 frozen** | 0.773 | **0.781** | **101%** |
+| DINOv2 fine-tuned | 0.803 | 0.386 | 48% |
 
-- [`reproduction.md`](reproduction.md)
-- [`bit-cd-foundation-results.md`](bit-cd-foundation-results.md)
-- [`foundation_backbone_comparison.ipynb`](foundation_backbone_comparison.ipynb)
+**Finding.** My hypothesis was that the EO-specific model would transfer better. It did not. The axis that mattered was **frozen vs fine-tuned**, not EO vs general: frozen features held up across the domain shift while fine-tuned ones collapsed (fine-tuned DINOv2's precision fell to 0.266, over-flagging unchanged buildings), and general-purpose DINOv2 beat EO-specific DOFA.
+
+**Caveats.** Single seed, one dataset pair, one transfer direction, and a deliberately simple adapter that caps in-domain F1. This is research-grade evidence, not a benchmark. Full caveats and the failure-mode figures are in **[`bit-cd-foundation-results.md`](bit-cd-foundation-results.md)**; the code is in [`foundation_backbone_comparison.ipynb`](foundation_backbone_comparison.ipynb) and [`dofa_bit_integration.ipynb`](dofa_bit_integration.ipynb).
 
 ---
+
+# Original README (Chen, Qi & Shi)
 
 Here, we provide the pytorch implementation of the paper: Remote Sensing Image Change Detection with Transformers.
 
