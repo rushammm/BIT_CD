@@ -18,6 +18,12 @@ I reproduced BIT-CD on LEVIR-CD, then asked whether a foundation-model backbone 
 | **DINOv2 frozen** | 0.773 | **0.781** | **101%** |
 | DINOv2 fine-tuned | 0.803 | 0.386 | 48% |
 
+![In-domain vs zero-shot F1 for each backbone](figures/transfer_f1_chart.png)
+
+The fine-tuned model is the better of the two in-domain and the worse of the two the moment the domain changes — visible on a WHU test scene, where fine-tuned DINOv2 floods the mask with false positives while the frozen model holds its shape:
+
+![Frozen vs fine-tuned DINOv2 predictions on a WHU test scene](figures/whu_frozen_vs_ft_square.png)
+
 **Finding.** My hypothesis was that the EO-specific model would transfer better. It did not. The axis that mattered was **frozen vs fine-tuned**, not EO vs general: frozen features held up across the domain shift while fine-tuned ones collapsed (fine-tuned DINOv2's precision fell to 0.266, over-flagging unchanged buildings), and general-purpose DINOv2 beat EO-specific DOFA.
 
 **Caveats.** Single seed, one dataset pair, one transfer direction, and a deliberately simple adapter that caps in-domain F1. This is research-grade evidence, not a benchmark. Full caveats and the failure-mode figures are in **[`bit-cd-foundation-results.md`](bit-cd-foundation-results.md)**; the code is in [`foundation_backbone_comparison.ipynb`](foundation_backbone_comparison.ipynb) and [`dofa_bit_integration.ipynb`](dofa_bit_integration.ipynb).
